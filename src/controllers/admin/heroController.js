@@ -61,16 +61,24 @@ const updateHero = async (req, res) => {
         .json({ success: false, message: "Hero not found." });
     }
 
-    const section = hero.sections.id(sectionId);
+    let section = hero.sections.id(sectionId);
+    let index = -1;
+    if (!section) {
+      index = hero.sections.findIndex(
+        (s) => s && s._id && s._id.toString() === sectionId.toString(),
+      );
+      if (index !== -1) {
+        section = hero.sections[index];
+      }
+    }
+
     if (!section) {
       return res
         .status(404)
         .json({ success: false, message: "Hero section not found." });
     }
 
-
     if (req.file) {
-
       if (section.backgroundImage) {
         await deleteFromCloudinary(section.backgroundImage);
       }
@@ -106,19 +114,38 @@ const deleteHero = async (req, res) => {
         .json({ success: false, message: "Hero not found." });
     }
 
-    const section = hero.sections.id(sectionId);
+    let section = hero.sections.id(sectionId);
+
+    let index = -1;
+    if (!section) {
+      index = hero.sections.findIndex(
+        (s) => s && s._id && s._id.toString() === sectionId.toString(),
+      );
+      if (index !== -1) {
+        section = hero.sections[index];
+      }
+    }
+
     if (!section) {
       return res
         .status(404)
         .json({ success: false, message: "Hero section not found." });
     }
 
-
     if (section.backgroundImage) {
       await deleteFromCloudinary(section.backgroundImage);
     }
 
-    section.remove();
+    if (section && typeof section.remove === "function") {
+      section.remove();
+    } else if (index !== -1) {
+      hero.sections.splice(index, 1);
+    } else {
+      hero.sections = hero.sections.filter(
+        (s) => s && s._id && s._id.toString() !== sectionId.toString(),
+      );
+    }
+
     await hero.save();
 
     res.status(200).json({

@@ -36,6 +36,16 @@ const siteSettingsSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    headerCTA: {
+      text: {
+        type: String,
+        default: "",
+      },
+      link: {
+        type: String,
+        default: "",
+      },
+    },
     socialMedia: {
       type: [socialMediaSchema],
       default: [],

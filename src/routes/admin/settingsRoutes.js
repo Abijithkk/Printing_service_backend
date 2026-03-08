@@ -9,6 +9,7 @@ const {
   addSocialMediaLink,
   updateSocialMediaLink,
   deleteSocialMediaLink,
+  updateHeaderCTA,
 } = require("../../controllers/admin/settingsController");
 
 const router = express.Router();
@@ -34,5 +35,8 @@ router.put("/footer", protect, admin, updateFooterText);
 router.post("/social-media", protect, admin, handleSocialMediaIconUpload, addSocialMediaLink);
 router.put("/social-media/:id", protect, admin, handleSocialMediaIconUpload, updateSocialMediaLink);
 router.delete("/social-media/:id", protect, admin, deleteSocialMediaLink);
+
+// allow editing of the single header CTA text/link stored in site settings
+router.put("/header-cta", protect, admin, updateHeaderCTA);
 
 module.exports = router;

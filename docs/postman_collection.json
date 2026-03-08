@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "QNL Backend API",
-    "description": "Postman Collection for QNL Backend APIs. It includes Authentication, Admin Operations, and Public APIs.",
+    "description": "Cleaned up Postman collection for the QNL backend. Use the environment variables to configure host and credentials. Run the Auth/Login request first to populate the {{token}} variable.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -12,22 +12,73 @@
     },
     {
       "key": "token",
-      "value": "YOUR_ADMIN_TOKEN_HERE",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_email",
+      "value": "admin@qnl.com",
+      "type": "string"
+    },
+    {
+      "key": "admin_password",
+      "value": "Aa1234567",
+      "type": "string"
+    },
+    {
+      "key": "navId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "highlightId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "serviceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "testimonialId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "actionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "socialMediaId",
+      "value": "",
       "type": "string"
     }
   ],
   "item": [
     {
-      "name": "Auth",
+      "name": "Authentication",
+      "description": "Endpoints to obtain tokens for admin users.",
       "item": [
         {
           "name": "Login Admin",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@qnl.com\",\n  \"password\": \"admin123\"\n}",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -36,162 +87,194 @@
             },
             "url": {
               "raw": "{{base_url}}/api/auth/login",
-              "host": ["{{base_url}}"],
-              "path": ["api", "auth", "login"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var json = pm.response.json();",
+                  "if (json && json.token) {",
+                  "    pm.environment.set('token', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
     {
       "name": "Admin",
+      "description": "All admin operations. `Authorization: Bearer {{token}}` is added automatically.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token}}",
+            "type": "string"
+          }
+        ]
+      },
       "item": [
         {
           "name": "Header Navigation",
+          "description": "Manage navigation links shown in the header.",
           "item": [
             {
-              "name": "Get Navigation Items",
+              "name": "Get all navigation items",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
                   "raw": "{{base_url}}/api/admin/header/navigation",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "header", "navigation"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "header",
+                    "navigation"
+                  ]
                 }
               }
             },
             {
-              "name": "Create Navigation Item",
+              "name": "Create navigation item",
               "request": {
                 "method": "POST",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "application/json"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"Home\",\n  \"link\": \"/home\",\n  \"order\": 1\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n  \"title\": \"Home\",\n  \"link\": \"/home\",\n  \"order\": 1\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/header/navigation",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "header", "navigation"]
-                }
-              }
-            },
-            {
-              "name": "Update Navigation Item",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"title\": \"Updated Home\",\n  \"link\": \"/home-updated\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/admin/header/navigation/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "header", "navigation", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "ITEM_ID_HERE"
-                    }
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "header",
+                    "navigation"
                   ]
                 }
               }
             },
             {
-              "name": "Reorder Navigation Items",
+              "name": "Update navigation item",
               "request": {
                 "method": "PUT",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "application/json"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "[\n  {\n    \"id\": \"ITEM_1_ID\",\n    \"order\": 1\n  },\n  {\n    \"id\": \"ITEM_2_ID\",\n    \"order\": 2\n  }\n]",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
+                  "raw": "{\n  \"title\": \"Updated Home\",\n  \"link\": \"/home-updated\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/admin/header/navigation/{{navId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "header",
+                    "navigation",
+                    "{{navId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reorder navigation items",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
                   }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\n  { \"id\": \"ITEM_1_ID\", \"order\": 1 },\n  { \"id\": \"ITEM_2_ID\", \"order\": 2 }\n]"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/header/navigation/reorder",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "header", "navigation", "reorder"]
-                }
-              }
-            },
-            {
-              "name": "Delete Navigation Item",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/admin/header/navigation/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "header", "navigation", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "ITEM_ID_HERE"
-                    }
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "header",
+                    "navigation",
+                    "reorder"
                   ]
                 }
               }
             },
             {
-              "name": "Toggle Active Status",
+              "name": "Delete navigation item",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{base_url}}/api/admin/header/navigation/{{navId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "header",
+                    "navigation",
+                    "{{navId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Toggle navigation item active",
               "request": {
                 "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
-                  "raw": "{{base_url}}/api/admin/header/navigation/:id/toggle-active",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "header", "navigation", ":id", "toggle-active"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "ITEM_ID_HERE"
-                    }
+                  "raw": "{{base_url}}/api/admin/header/navigation/{{navId}}/toggle-active",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "header",
+                    "navigation",
+                    "{{navId}}",
+                    "toggle-active"
                   ]
                 }
               }
@@ -199,48 +282,52 @@
           ]
         },
         {
-          "name": "Header CTA Button",
+          "name": "Header CTA",
+          "description": "Call‑to‑action button in the header.",
           "item": [
             {
-              "name": "Get CTA Button",
+              "name": "Get CTA button",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
                   "raw": "{{base_url}}/api/admin/header/cta",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "header", "cta"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "header",
+                    "cta"
+                  ]
                 }
               }
             },
             {
-              "name": "Update CTA Button",
+              "name": "Update CTA button",
               "request": {
                 "method": "PUT",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "application/json"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"text\": \"Get Started\",\n  \"link\": \"/contact\",\n  \"isActive\": true\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n  \"text\": \"Get Started\",\n  \"link\": \"/contact\",\n  \"isActive\": true\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/header/cta",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "header", "cta"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "header",
+                    "cta"
+                  ]
                 }
               }
             }
@@ -250,30 +337,30 @@
           "name": "Hero Section",
           "item": [
             {
-              "name": "Get Hero",
+              "name": "Get hero data",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
                   "raw": "{{base_url}}/api/admin/hero",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "hero"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "hero"
+                  ]
                 }
               }
             },
             {
-              "name": "Update Hero",
+              "name": "Update hero",
               "request": {
                 "method": "PUT",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
                   }
                 ],
                 "body": {
@@ -308,8 +395,14 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/hero",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "hero"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "hero"
+                  ]
                 }
               }
             }
@@ -319,30 +412,30 @@
           "name": "Site Settings",
           "item": [
             {
-              "name": "Get Settings",
+              "name": "Get settings",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
                   "raw": "{{base_url}}/api/admin/site-settings",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "site-settings"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "site-settings"
+                  ]
                 }
               }
             },
             {
-              "name": "Update Logo",
+              "name": "Update logo",
               "request": {
                 "method": "PUT",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
                   }
                 ],
                 "body": {
@@ -357,140 +450,174 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/site-settings/logo",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "site-settings", "logo"]
-                }
-              }
-            },
-            {
-              "name": "Update Contact Details",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"email\": \"contact@qnl.com\",\n  \"phone\": \"+123456789\",\n  \"address\": \"123 QNL Street\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/admin/site-settings/contact",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "site-settings", "contact"]
-                }
-              }
-            },
-            {
-              "name": "Update Footer Text",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"footerText\": \"© 2026 QNL. All rights reserved.\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/admin/site-settings/footer",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "site-settings", "footer"]
-                }
-              }
-            },
-            {
-              "name": "Add Social Media Link",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"platform\": \"Facebook\",\n  \"url\": \"https://facebook.com/qnl\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/admin/site-settings/social-media",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "site-settings", "social-media"]
-                }
-              }
-            },
-            {
-              "name": "Update Social Media Link",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"platform\": \"Twitter\",\n  \"url\": \"https://twitter.com/qnl\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/admin/site-settings/social-media/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "site-settings", "social-media", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "PLATFORM_ID_HERE"
-                    }
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "site-settings",
+                    "logo"
                   ]
                 }
               }
             },
             {
-              "name": "Delete Social Media Link",
+              "name": "Update contact details",
               "request": {
-                "method": "DELETE",
+                "method": "PUT",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "application/json"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"contact@qnl.com\",\n  \"phone\": \"+123456789\",\n  \"address\": \"123 QNL Street\"\n}"
+                },
                 "url": {
-                  "raw": "{{base_url}}/api/admin/site-settings/social-media/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "site-settings", "social-media", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "PLATFORM_ID_HERE"
-                    }
+                  "raw": "{{base_url}}/api/admin/site-settings/contact",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "site-settings",
+                    "contact"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update header CTA",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"text\": \"Request a Quote\",\n  \"link\": \"/quote\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/admin/site-settings/header-cta",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "site-settings",
+                    "header-cta"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update footer text",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"footerText\": \"© 2026 QNL. All rights reserved.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/admin/site-settings/footer",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "site-settings",
+                    "footer"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add social media link",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"platform\": \"Facebook\",\n  \"url\": \"https://facebook.com/qnl\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/admin/site-settings/social-media",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "site-settings",
+                    "social-media"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update social media link",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"platform\": \"Twitter\",\n  \"url\": \"https://twitter.com/qnl\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/admin/site-settings/social-media/{{socialMediaId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "site-settings",
+                    "social-media",
+                    "{{socialMediaId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete social media link",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{base_url}}/api/admin/site-settings/social-media/{{socialMediaId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "site-settings",
+                    "social-media",
+                    "{{socialMediaId}}"
                   ]
                 }
               }
@@ -501,30 +628,30 @@
           "name": "Highlights",
           "item": [
             {
-              "name": "Get Highlights",
+              "name": "Get highlights",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
                   "raw": "{{base_url}}/api/admin/highlights",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "highlights"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "highlights"
+                  ]
                 }
               }
             },
             {
-              "name": "Create Highlight",
+              "name": "Create highlight",
               "request": {
                 "method": "POST",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
                   }
                 ],
                 "body": {
@@ -549,19 +676,25 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/highlights",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "highlights"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "highlights"
+                  ]
                 }
               }
             },
             {
-              "name": "Update Highlight",
+              "name": "Update highlight",
               "request": {
                 "method": "PUT",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
                   }
                 ],
                 "body": {
@@ -575,86 +708,80 @@
                   ]
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/admin/highlights/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "highlights", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "HIGHLIGHT_ID_HERE"
-                    }
+                  "raw": "{{base_url}}/api/admin/highlights/{{highlightId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "highlights",
+                    "{{highlightId}}"
                   ]
                 }
               }
             },
             {
-              "name": "Reorder Highlights",
+              "name": "Reorder highlights",
               "request": {
                 "method": "PUT",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "application/json"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "[\n  {\n    \"id\": \"HIGHLIGHT_1_ID\",\n    \"order\": 1\n  }\n]",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "[\n  { \"id\": \"HIGHLIGHT_1_ID\", \"order\": 1 }\n]"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/highlights/reorder",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "highlights", "reorder"]
-                }
-              }
-            },
-            {
-              "name": "Delete Highlight",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/admin/highlights/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "highlights", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "HIGHLIGHT_ID_HERE"
-                    }
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "highlights",
+                    "reorder"
                   ]
                 }
               }
             },
             {
-              "name": "Toggle Highlight Status",
+              "name": "Delete highlight",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{base_url}}/api/admin/highlights/{{highlightId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "highlights",
+                    "{{highlightId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Toggle highlight active",
               "request": {
                 "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
-                  "raw": "{{base_url}}/api/admin/highlights/:id/toggle-active",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "highlights", ":id", "toggle-active"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "HIGHLIGHT_ID_HERE"
-                    }
+                  "raw": "{{base_url}}/api/admin/highlights/{{highlightId}}/toggle-active",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "highlights",
+                    "{{highlightId}}",
+                    "toggle-active"
                   ]
                 }
               }
@@ -665,30 +792,30 @@
           "name": "Categories",
           "item": [
             {
-              "name": "Get Categories",
+              "name": "Get categories",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
                   "raw": "{{base_url}}/api/admin/categories",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "categories"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "categories"
+                  ]
                 }
               }
             },
             {
-              "name": "Create Category",
+              "name": "Create category",
               "request": {
                 "method": "POST",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
                   }
                 ],
                 "body": {
@@ -713,19 +840,25 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/categories",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "categories"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "categories"
+                  ]
                 }
               }
             },
             {
-              "name": "Update Category",
+              "name": "Update category",
               "request": {
                 "method": "PUT",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
                   }
                 ],
                 "body": {
@@ -739,86 +872,80 @@
                   ]
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/admin/categories/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "categories", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "CATEGORY_ID_HERE"
-                    }
+                  "raw": "{{base_url}}/api/admin/categories/{{categoryId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "categories",
+                    "{{categoryId}}"
                   ]
                 }
               }
             },
             {
-              "name": "Reorder Categories",
+              "name": "Reorder categories",
               "request": {
                 "method": "PUT",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "application/json"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "[\n  {\n    \"id\": \"CATEGORY_1_ID\",\n    \"order\": 1\n  }\n]",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "[\n  { \"id\": \"CATEGORY_1_ID\", \"order\": 1 }\n]"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/categories/reorder",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "categories", "reorder"]
-                }
-              }
-            },
-            {
-              "name": "Delete Category",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/admin/categories/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "categories", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "CATEGORY_ID_HERE"
-                    }
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "categories",
+                    "reorder"
                   ]
                 }
               }
             },
             {
-              "name": "Toggle Category Status",
+              "name": "Delete category",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{base_url}}/api/admin/categories/{{categoryId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "categories",
+                    "{{categoryId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Toggle category active",
               "request": {
                 "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
-                  "raw": "{{base_url}}/api/admin/categories/:id/toggle-active",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "categories", ":id", "toggle-active"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "CATEGORY_ID_HERE"
-                    }
+                  "raw": "{{base_url}}/api/admin/categories/{{categoryId}}/toggle-active",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "categories",
+                    "{{categoryId}}",
+                    "toggle-active"
                   ]
                 }
               }
@@ -829,30 +956,30 @@
           "name": "Services",
           "item": [
             {
-              "name": "Get Services",
+              "name": "Get services",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
                   "raw": "{{base_url}}/api/admin/services",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "services"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "services"
+                  ]
                 }
               }
             },
             {
-              "name": "Create Service",
+              "name": "Create service",
               "request": {
                 "method": "POST",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
                   }
                 ],
                 "body": {
@@ -877,19 +1004,25 @@
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/services",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "services"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "services"
+                  ]
                 }
               }
             },
             {
-              "name": "Update Service",
+              "name": "Update service",
               "request": {
                 "method": "PUT",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "multipart/form-data"
                   }
                 ],
                 "body": {
@@ -903,86 +1036,80 @@
                   ]
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/admin/services/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "services", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "SERVICE_ID_HERE"
-                    }
+                  "raw": "{{base_url}}/api/admin/services/{{serviceId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "services",
+                    "{{serviceId}}"
                   ]
                 }
               }
             },
             {
-              "name": "Reorder Services",
+              "name": "Reorder services",
               "request": {
                 "method": "PUT",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "application/json"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "[\n  {\n    \"id\": \"SERVICE_1_ID\",\n    \"order\": 1\n  }\n]",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "[\n  { \"id\": \"SERVICE_1_ID\", \"order\": 1 }\n]"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/services/reorder",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "services", "reorder"]
-                }
-              }
-            },
-            {
-              "name": "Delete Service",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/admin/services/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "services", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "SERVICE_ID_HERE"
-                    }
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "services",
+                    "reorder"
                   ]
                 }
               }
             },
             {
-              "name": "Toggle Service Status",
+              "name": "Delete service",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{base_url}}/api/admin/services/{{serviceId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "services",
+                    "{{serviceId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Toggle service active",
               "request": {
                 "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
-                  "raw": "{{base_url}}/api/admin/services/:id/toggle-active",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "services", ":id", "toggle-active"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "SERVICE_ID_HERE"
-                    }
+                  "raw": "{{base_url}}/api/admin/services/{{serviceId}}/toggle-active",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "services",
+                    "{{serviceId}}",
+                    "toggle-active"
                   ]
                 }
               }
@@ -993,122 +1120,110 @@
           "name": "Testimonials",
           "item": [
             {
-              "name": "Get Testimonials",
+              "name": "Get testimonials",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
                   "raw": "{{base_url}}/api/admin/testimonials",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "testimonials"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "testimonials"
+                  ]
                 }
               }
             },
             {
-              "name": "Create Testimonial",
+              "name": "Create testimonial",
               "request": {
                 "method": "POST",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "application/json"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"John Doe\",\n  \"message\": \"Great service!\",\n  \"designation\": \"CEO\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n  \"name\":\"John Doe\",\n  \"message\":\"Great service!\",\n  \"designation\":\"CEO\"\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/testimonials",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "testimonials"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "testimonials"
+                  ]
                 }
               }
             },
             {
-              "name": "Update Testimonial",
+              "name": "Update testimonial",
               "request": {
                 "method": "PUT",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "application/json"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"John Doe Updated\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n  \"name\":\"John Doe Updated\"\n}"
                 },
                 "url": {
-                  "raw": "{{base_url}}/api/admin/testimonials/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "testimonials", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "TESTIMONIAL_ID_HERE"
-                    }
+                  "raw": "{{base_url}}/api/admin/testimonials/{{testimonialId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "testimonials",
+                    "{{testimonialId}}"
                   ]
                 }
               }
             },
             {
-              "name": "Delete Testimonial",
+              "name": "Delete testimonial",
               "request": {
                 "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
-                  "raw": "{{base_url}}/api/admin/testimonials/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "testimonials", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "TESTIMONIAL_ID_HERE"
-                    }
+                  "raw": "{{base_url}}/api/admin/testimonials/{{testimonialId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "testimonials",
+                    "{{testimonialId}}"
                   ]
                 }
               }
             },
             {
-              "name": "Toggle Testimonial Status",
+              "name": "Toggle testimonial active",
               "request": {
                 "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
-                  "raw": "{{base_url}}/api/admin/testimonials/:id/toggle-active",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "testimonials", ":id", "toggle-active"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "TESTIMONIAL_ID_HERE"
-                    }
+                  "raw": "{{base_url}}/api/admin/testimonials/{{testimonialId}}/toggle-active",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "testimonials",
+                    "{{testimonialId}}",
+                    "toggle-active"
                   ]
                 }
               }
@@ -1119,148 +1234,138 @@
           "name": "Quick Actions",
           "item": [
             {
-              "name": "Get Quick Actions",
+              "name": "Get quick actions",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
                   "raw": "{{base_url}}/api/admin/quick-actions",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "quick-actions"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "quick-actions"
+                  ]
                 }
               }
             },
             {
-              "name": "Create Quick Action",
+              "name": "Create quick action",
               "request": {
                 "method": "POST",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "application/json"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"title\": \"Support\",\n  \"link\": \"/support\",\n  \"icon\": \"support-icon\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
+                  "raw": "{\n  \"title\":\"Support\",\n  \"link\":\"/support\",\n  \"icon\":\"support-icon\"\n}"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/quick-actions",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "quick-actions"]
-                }
-              }
-            },
-            {
-              "name": "Update Quick Action",
-              "request": {
-                "method": "PUT",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"title\": \"Help Center\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/admin/quick-actions/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "quick-actions", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "ACTION_ID_HERE"
-                    }
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "quick-actions"
                   ]
                 }
               }
             },
             {
-              "name": "Reorder Quick Actions",
+              "name": "Update quick action",
               "request": {
                 "method": "PUT",
                 "header": [
                   {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
+                    "key": "Content-Type",
+                    "value": "application/json"
                   }
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "[\n  {\n    \"id\": \"ACTION_1_ID\",\n    \"order\": 1\n  }\n]",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
+                  "raw": "{\n  \"title\":\"Help Center\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/admin/quick-actions/{{actionId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "quick-actions",
+                    "{{actionId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reorder quick actions",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
                   }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "[\n  { \"id\":\"ACTION_1_ID\",\"order\":1 }\n]"
                 },
                 "url": {
                   "raw": "{{base_url}}/api/admin/quick-actions/reorder",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "quick-actions", "reorder"]
-                }
-              }
-            },
-            {
-              "name": "Delete Quick Action",
-              "request": {
-                "method": "DELETE",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/admin/quick-actions/:id",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "quick-actions", ":id"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "ACTION_ID_HERE"
-                    }
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "quick-actions",
+                    "reorder"
                   ]
                 }
               }
             },
             {
-              "name": "Toggle Quick Action Status",
+              "name": "Delete quick action",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{base_url}}/api/admin/quick-actions/{{actionId}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "quick-actions",
+                    "{{actionId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Toggle quick action active",
               "request": {
                 "method": "PATCH",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
-                  "raw": "{{base_url}}/api/admin/quick-actions/:id/toggle-active",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "quick-actions", ":id", "toggle-active"],
-                  "variable": [
-                    {
-                      "key": "id",
-                      "value": "ACTION_ID_HERE"
-                    }
+                  "raw": "{{base_url}}/api/admin/quick-actions/{{actionId}}/toggle-active",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "quick-actions",
+                    "{{actionId}}",
+                    "toggle-active"
                   ]
                 }
               }
@@ -1271,19 +1376,19 @@
           "name": "Newsletter",
           "item": [
             {
-              "name": "Get Subscribers",
+              "name": "Get subscribers",
               "request": {
                 "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}"
-                  }
-                ],
                 "url": {
                   "raw": "{{base_url}}/api/admin/newsletter",
-                  "host": ["{{base_url}}"],
-                  "path": ["api", "admin", "newsletter"]
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "admin",
+                    "newsletter"
+                  ]
                 }
               }
             }
@@ -1293,37 +1398,50 @@
     },
     {
       "name": "Public",
+      "description": "Unauthenticated endpoints",
       "item": [
         {
-          "name": "Get Home Data",
+          "name": "Get home data",
+          "description": "Returns full home payload including settings, header.nav, quickActions, hero, highlights, services, testimonials, categories; ctaButtons are returned as top-level array.",
           "request": {
             "method": "GET",
-            "header": [],
             "url": {
               "raw": "{{base_url}}/api/public/home",
-              "host": ["{{base_url}}"],
-              "path": ["api", "public", "home"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "home"
+              ]
             }
           }
         },
         {
-          "name": "Subscribe to Newsletter",
+          "name": "Subscribe to newsletter",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"johndoe@example.com\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"firstName\":\"John\",\n  \"lastName\":\"Doe\",\n  \"email\":\"johndoe@example.com\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/public/newsletter",
-              "host": ["{{base_url}}"],
-              "path": ["api", "public", "newsletter"]
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "newsletter"
+              ]
             }
           }
         }

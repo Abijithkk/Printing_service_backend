@@ -16,8 +16,13 @@ const getHeaderSettings = async (req, res) => {
 
 const updateHeaderSettings = async (req, res) => {
   try {
-    const { logoUrl, searchIconEnabled, cartIconEnabled, userIconEnabled } =
-      req.body;
+    const {
+      logoUrl,
+      searchIconEnabled,
+      cartIconEnabled,
+      userIconEnabled,
+      headerCTA,
+    } = req.body;
     let settings = await SiteSettings.findOne();
 
     if (settings) {
@@ -35,6 +40,19 @@ const updateHeaderSettings = async (req, res) => {
           ? userIconEnabled
           : settings.userIconEnabled;
 
+      if (headerCTA) {
+        settings.headerCTA = {
+          text:
+            headerCTA.text !== undefined
+              ? headerCTA.text
+              : settings.headerCTA.text,
+          link:
+            headerCTA.link !== undefined
+              ? headerCTA.link
+              : settings.headerCTA.link,
+        };
+      }
+
       const updatedSettings = await settings.save();
       return sendSuccess(res, "Header settings updated", updatedSettings);
     } else {
@@ -43,6 +61,7 @@ const updateHeaderSettings = async (req, res) => {
         searchIconEnabled,
         cartIconEnabled,
         userIconEnabled,
+        headerCTA: headerCTA || {},
       });
       return sendSuccess(res, "Header settings created", settings, 201);
     }
@@ -50,6 +69,7 @@ const updateHeaderSettings = async (req, res) => {
     return sendError(res, "Server error", { details: error.message });
   }
 };
+
 
 const getNavigationItems = async (req, res) => {
   try {

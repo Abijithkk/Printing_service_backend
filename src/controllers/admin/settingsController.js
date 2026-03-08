@@ -140,6 +140,23 @@ const deleteSocialMediaLink = async (req, res) => {
   }
 };
 
+// update single header CTA stored in site settings
+const updateHeaderCTA = async (req, res) => {
+  try {
+    const { text, link } = req.body;
+    let settings = (await SiteSettings.findOne()) || new SiteSettings({});
+
+    settings.headerCTA = settings.headerCTA || {};
+    if (text !== undefined) settings.headerCTA.text = text;
+    if (link !== undefined) settings.headerCTA.link = link;
+
+    const updated = await settings.save();
+    return sendSuccess(res, "Header CTA updated successfully", updated);
+  } catch (error) {
+    return sendError(res, "Server error", { details: error.message });
+  }
+};
+
 module.exports = {
   getSiteSettings,
   updateLogo,
@@ -148,4 +165,5 @@ module.exports = {
   addSocialMediaLink,
   updateSocialMediaLink,
   deleteSocialMediaLink,
+  updateHeaderCTA,
 };
